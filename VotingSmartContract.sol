@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract Voting {
@@ -10,9 +9,11 @@ contract Voting {
     mapping(address => bool) public hasVoted;
     mapping(bytes32 => Proposal) public proposals;
     bytes32[] public proposalIds;
+    bytes32 public winningProposal;
 
     event ProposalCreated(bytes32 id, string description);
     event Voted(address indexed voter, bytes32 proposalId);
+    event WinningProposal(bytes32 proposalId, uint256 voteCount);
 
     function createProposal(bytes32 id, string memory description) external {
         require(proposals[id].voteCount == 0, "Proposal ID already exists");
@@ -34,8 +35,8 @@ contract Voting {
         emit Voted(msg.sender, proposalId);
     }
 
-    function getWinningProposal() external view returns (bytes32 winningProposal, uint256 winningVoteCount) {
-        require(proposalIds.length > 0, "No proposals available");
+    function calculateWinningProposal() internal {
+        uint256 winningVoteCount = 0;
 
         for (uint256 i = 0; i < proposalIds.length; i++) {
             bytes32 id = proposalIds[i];
@@ -45,5 +46,12 @@ contract Voting {
                 winningVoteCount = voteCount;
             }
         }
+
+        emit WinningProposal(winningProposal, winningVoteCount);
+    }
+
+    function getWinningProposal() external {
+        require(proposalIds.length > 0, "No proposals available");
+        calculateWinningProposal();
     }
 }
