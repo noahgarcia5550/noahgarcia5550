@@ -25,6 +25,8 @@ contract Voting {
     function listProposals() external view returns (bytes32[] memory) {
         return proposalIds;
     }
+    event Voted(address indexed voter, bytes32 proposalId);
+    event WinningProposal(bytes32 proposalId, uint256 voteCount);
 
     function vote(bytes32 proposalId) external {
         require(!hasVoted[msg.sender], "Already voted");
